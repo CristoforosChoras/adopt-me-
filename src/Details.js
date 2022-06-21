@@ -1,50 +1,42 @@
 import { Component } from "react";
-import { useParams } from "react-router-dom";
-import Carousel from "./Carousel";
-import ErrorBoundary from "./ErrorBoundary";
 
-class Details extends Component {
-  constructor() {
-    super();
-    this.state = { loading: true };
-  }
+class Carousel extends Component {
+  state = {
+    active: 0,
+  };
 
-  async componentDidMount() {
-    const res = await fetch(
-      `http://pets-v2.dev-apis.com/pets?id=${this.props.params.id}`
-    );
-    const json = await res.json();
-    this.setState(Object.assign({ loading: false }, json.pets[0]));
-  }
+  static defaultProps = {
+    images: ["http://pets-images.dev-apis.com/pets/none.jpg"],
+  };
+
+  handleIndexClick = (event) => {
+    this.setState({
+      active: +event.target.dataset.index,
+    });
+  };
 
   render() {
-    if (this.state.loading) {
-      return <h2>loading … </h2>;
-    }
-
-    const { animal, breed, city, state, description, name, images } = this.state;
-
+    const { active } = this.state;
+    const { images } = this.props;
     return (
-      <div className="details">
-        <Carousel images={images} />;
-        <div>
-          <h1>{name}</h1>
-          <h2>{`${animal} — ${breed} — ${city}, ${state}`}</h2>
-          <button>Adopt {name}</button>
-          <p>{description}</p>
+      <div className="carousel">
+        <img src={images[active]} alt="animal" />
+        <div className="carousel-smaller">
+          {images.map((photo, index) => (
+            // eslint-disable-next-line
+            <img
+              key={photo}
+              src={photo}
+              className={index === active ? "active" : ""}
+              alt="animal thumbnail"
+              onClick={this.handleIndexClick}
+              data-index={index}
+            />
+          ))}
         </div>
       </div>
     );
   }
 }
 
-const WrappedDetails = () => {
-  const params = useParams();
-  return (
-    <ErrorBoundary>
-      <Details params={params} />
-    </ErrorBoundary>
-  );
-};
-
-export default WrappedDetails;
+export default Carousel;
